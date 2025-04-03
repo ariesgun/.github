@@ -224,6 +224,7 @@ jobs:
           ref: ${{ steps.config.outputs.head_branch }}
           repository: ${{ steps.config.outputs.target_repository }}
           working-directory: target-to-synced
+          fail-on-no-changes: false
 
       - name: Create PR
         env:
