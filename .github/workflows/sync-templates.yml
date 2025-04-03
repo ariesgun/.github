@@ -71,7 +71,8 @@ jobs:
                   REPO_INFO=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repository}")
                   if [[ "$(echo "$REPO_INFO" | jq -r '.template_repository.full_name')" == "${TEMPLATE_REPO}" ]]; then
                     echo "Matches ${repository}"
-                    ALL_REPOSITORIES+=("${REPO_INFO}")
+                    REPO_NAME=$(echo "REPO_INFO" | jq -rc '.full_name')
+                    ALL_REPOSITORIES+=("${REPO_NAME}")
                   fi              
                 done
 
