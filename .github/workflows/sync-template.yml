@@ -207,7 +207,7 @@ jobs:
           cd target-to-synced
 
           git reset --hard
-          git pull
+          git pull origin ${{ steps.config.outputs.head_branch }}
 
           bun knip --fix || true
           bun prettier --write *.ts || true
