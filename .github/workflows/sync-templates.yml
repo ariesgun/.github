@@ -67,8 +67,9 @@ jobs:
                 REPOSITORIES=($(echo $FILTERED_REPOS | jq -rc '.[] | .full_name'))
                 
                 for repository in "${REPOSITORIES[@]}"; do
+                  echo $organization $repository
                   # REPO_INFO=$(curl -s "https://api.github.com/repos/${organization}/${repository}")
-                  REPO_INFO=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/OWNER/REPO)
+                  REPO_INFO=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${organization}/${repository}")
                   if [[ "$(echo "$REPO_INFO" | jq -r '.template_repository.full_name')" == "${TEMPLATE_REPO}" ]]; then
                     echo "Matches ${repository}"
                     ALL_REPOSITORIES+=("${REPO_INFO}")
