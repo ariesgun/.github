@@ -53,8 +53,14 @@ jobs:
                 fi
 
                 FILTERED_REPOS=$(echo $LIST_REPOS | jq -rc --arg TEMPLATE_REPO $TEMPLATE_REPO --arg $CUR_REPO ${{ github.repository }} '[.[] | select(.full_name != $TEMPLATE_REPO and .full_name != $CUR_REPO)]')
-                REPOSITORIES=($(echo $FILTERED_REPOS | jq -rc --arg TEMPLATE_REPO $TEMPLATE_REPO '[.[] | select(.template_repository.full_name == $TEMPLATE_REPO)]' | jq -rc '.[] | .full_name'))
-                ALL_REPOSITORIES+=("${REPOSITORIES[@]}")
+                REPOSITORIES=($(echo $FILTERED_REPOS | jq -rc '.[] | .full_name'))
+                
+                for repository in "${REPOSITORIES[@]}"; do
+                  REPO_INFO=$(curl -s "https://api.github.com/repos/${organization}/${repository}")
+                  if [[ "$(echo "$REPO_INFO" | jq -r '.template_repository.full_name')" == "${TEMPLATE_REPO}" ]]; then
+                    ALL_REPOSITORIES+=("${REPO_INFO}")
+                  fi              
+                done
 
                 ((PAGE++))
               done
