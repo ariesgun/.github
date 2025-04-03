@@ -16,13 +16,24 @@ jobs:
     outputs:
       repositories: ${{ steps.config.outputs.repositories }}
     steps:
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v1
+        id: get_app_token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.get_app_token.outputs.token }}
 
       - name: Parse repositories from configuration file
         id: config
+        env:
+          GH_TOKEN: ${{ steps.get_app_token.outputs.token }}
         run: |
           CONFIG_FILE="${{ github.event.inputs.config_file || '.github/sync-template-config.json' }}"
           echo "Using configuration file: $CONFIG_FILE"
@@ -58,6 +69,7 @@ jobs:
                 for repository in "${REPOSITORIES[@]}"; do
                   REPO_INFO=$(curl -s "https://api.github.com/repos/${organization}/${repository}")
                   if [[ "$(echo "$REPO_INFO" | jq -r '.template_repository.full_name')" == "${TEMPLATE_REPO}" ]]; then
+                    echo "Matches ${repository}"
                     ALL_REPOSITORIES+=("${REPO_INFO}")
                   fi              
                 done
