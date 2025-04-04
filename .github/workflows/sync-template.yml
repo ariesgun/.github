@@ -185,16 +185,6 @@ jobs:
           # Stage changes
           git add .
 
-      - name: Create bun.lock file
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: |
-          cd target-to-synced
-
-          bun install || true
-          git add bun.lock || true
-
       - name: Create verified commit
         uses: dsanders11/github-app-commit-action@v1.5.0
         with:
@@ -205,7 +195,7 @@ jobs:
           repository: ${{ steps.config.outputs.target_repository }}
           working-directory: target-to-synced
           
-      - name: Run knip and prettier
+      - name: Run knip and prettier, update bun.lock file
         run: |
           cd target-to-synced
 
@@ -215,13 +205,16 @@ jobs:
           bun knip --fix || true
           bun prettier --write *.ts || true
 
+          bun install || true
+          git add bun.lock || true
+
           git add .
           git status
-  
+
       - name: Create verified commit
         uses: dsanders11/github-app-commit-action@v1.5.0
         with:
-          message: "chore: sync template(with potential conflicts)"
+          message: "chore: execute knip fix and prettier"
           force: true
           token: ${{ steps.get_app_token.outputs.token }}
           ref: ${{ steps.config.outputs.head_branch }}
